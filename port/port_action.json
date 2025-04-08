@@ -1,0 +1,31 @@
+{
+  "identifier": "deploy_k8s_vcluster",
+  "invocationMethod": {
+    "type": "GITHUB",
+    "reportWorkflowStatus": true,
+    "workflowInputs": {
+      "{{ spreadValue() }}": "{{ .inputs }}",
+      "port_context": {
+        "runId": "{{ .run.id }}",
+        "blueprint": "{{ .action.blueprint }}"
+      }
+    },
+    "org": "imranrazakhan",
+    "repo": "https://github.com/imranrazakhan/port-vcluster-idp-gitops",
+    "workflow": "port-action.yml"
+  },
+  "trigger": {
+    "type": "self-service",
+    "operation": "CREATE",
+    "userInputs": {
+      "properties": {},
+      "required": [],
+      "order": []
+    },
+    "blueprintIdentifier": "k8s-vcluster"
+  },
+  "title": "Deploy K8S vCluster",
+  "description": "Trigger GitHub workflow to deploy a virtual Kubernetes cluster (vCluster) using ArgoCD and GitOps. Automatically generates and commits the required manifest based on input parameters.",
+  "icon": "Azure",
+  "requiredApproval": false
+}
