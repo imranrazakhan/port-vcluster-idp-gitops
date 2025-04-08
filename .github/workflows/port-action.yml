@@ -1,4 +1,5 @@
 name: Port vCluster Deployment
+
 on:
   workflow_dispatch:
     inputs:
@@ -15,21 +16,23 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        
+
       - name: Create vCluster manifest
         run: |
-          cat <<EOF > clusters/dev/vcluster.yaml
+          mkdir -p clusters/dev/${{ github.event.inputs.clusterName }}
+          cat <<EOF > clusters/dev/${{ github.event.inputs.clusterName }}/vcluster.yaml
           apiVersion: cluster.x-k8s.io/v1beta1
           kind: Cluster
           metadata:
             name: ${{ github.event.inputs.clusterName }}
+            namespace: ${{ github.event.inputs.namespace }}
           spec:
             infrastructureRef:
               apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
               kind: VCluster
               name: ${{ github.event.inputs.clusterName }}
           EOF
-          
+
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
