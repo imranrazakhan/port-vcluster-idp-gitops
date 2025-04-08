@@ -2,11 +2,11 @@
 
 An Internal Developer Platform (IDP) proof-of-concept for self-service **vCluster** provisioning using [Port](https://www.getport.io/), GitHub Actions, and ArgoCD powered by GitOps.
 
-## 🚀 Overview
+## Overview
 
 This project demonstrates how platform teams can enable developers to provision virtual Kubernetes clusters (`vClusters`) through a self-service portal (Port) while using GitHub as the single source of truth, automated through GitHub Actions and deployed via ArgoCD and ApplicationSet.
 
-### 🔁 Flow Diagram
+### Flow Diagram
 
 1. Developer triggers a **Port action** to request a new vCluster.
 2. The action initiates a **GitHub Action** workflow which:
@@ -18,8 +18,6 @@ This project demonstrates how platform teams can enable developers to provision 
 4. Optionally, developers can manage their workloads inside vClusters.
 
 ---
-
-## 📁 Folder Structure
 
 
 ---
@@ -38,7 +36,7 @@ This project demonstrates how platform teams can enable developers to provision 
 
 ---
 
-## ✅ Prerequisites
+## Prerequisites
 
 - A Kubernetes cluster (e.g., AKS, GKE, EKS, or local dev)
 - ArgoCD installed and accessible
@@ -49,7 +47,7 @@ This project demonstrates how platform teams can enable developers to provision 
 
 ---
 
-## 🚦 GitHub Workflow Example
+## GitHub Workflow Example
 
 ```yaml
 name: Port vCluster Deployment
