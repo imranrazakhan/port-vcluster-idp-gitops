@@ -1,45 +1,93 @@
-# vCluster GitOps Deployment via GitHub Actions & ArgoCD
+# port-vcluster-idp-gitops
 
-This project enables automated provisioning of vClusters using GitHub Actions triggered by Port, and deployment via ArgoCD using `ApplicationSet`.
+An Internal Developer Platform (IDP) proof-of-concept for self-service **vCluster** provisioning using [Port](https://www.getport.io/), GitHub Actions, and ArgoCD powered by GitOps.
 
-## 📦 Project Structure
+## 🚀 Overview
+
+This project demonstrates how platform teams can enable developers to provision virtual Kubernetes clusters (`vClusters`) through a self-service portal (Port) while using GitHub as the single source of truth, automated through GitHub Actions and deployed via ArgoCD and ApplicationSet.
+
+### 🔁 Flow Diagram
+
+1. Developer triggers a **Port action** to request a new vCluster.
+2. The action initiates a **GitHub Action** workflow which:
+   - Generates a vCluster manifest.
+   - Commits it to the GitHub repo under `clusters/dev/`.
+3. **ArgoCD ApplicationSet** watches this directory and automatically:
+   - Detects the new manifest.
+   - Deploys the vCluster to the target Kubernetes cluster.
+4. Optionally, developers can manage their workloads inside vClusters.
+
+---
+
+## 📁 Folder Structure
 
 
+---
 
-## 🚀 How It Works
+## ⚙️ Tech Stack
 
-### 1. Trigger via Port
+| Component     | Purpose                                |
+|---------------|----------------------------------------|
+| **Port**      | IDP portal to trigger provisioning     |
+| **GitHub**    | Source of truth for manifests          |
+| **GitHub Actions** | Automation pipeline for manifest creation |
+| **ArgoCD**    | GitOps-based deployment controller     |
+| **ApplicationSet** | Dynamic app discovery for ArgoCD   |
+| **vCluster**  | Lightweight virtual Kubernetes clusters |
+| **Kubernetes**| Hosting the ArgoCD and vClusters       |
 
-Port triggers the GitHub Actions workflow `deploy-vcluster.yaml` with inputs:
-- `clusterName`: Name of the vCluster
-- `namespace`: (optional) Namespace for vCluster (default is `vcluster-ns`)
+---
 
-### 2. GitHub Action
+## ✅ Prerequisites
 
-The action:
-- Creates a vCluster manifest under `clusters/dev/`
-- Commits and pushes the manifest to the `main` branch
+- A Kubernetes cluster (e.g., AKS, GKE, EKS, or local dev)
+- ArgoCD installed and accessible
+- [ApplicationSet](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/) controller installed
+- [vCluster](https://www.vcluster.com/) CLI (optional for testing)
+- GitHub repository with workflows enabled
+- Port environment with GitHub integration
 
-### 3. ArgoCD + ApplicationSet
+---
 
-The `apps/applicationset.yaml` configures ArgoCD to watch the `clusters/dev/` directory. It auto-syncs and deploys any vCluster definitions found there.
-
-## 📂 Example Generated vCluster Manifest
+## 🚦 GitHub Workflow Example
 
 ```yaml
-apiVersion: cluster.x-k8s.io/v1beta1
-kind: Cluster
-metadata:
-  name: my-vcluster
-spec:
-  infrastructureRef:
-    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
-    kind: VCluster
-    name: my-vcluster
+name: Port vCluster Deployment
+on:
+  workflow_dispatch:
+    inputs:
+      clusterName:
+        description: 'Cluster name'
+        required: true
+      namespace:
+        description: 'Target namespace'
+        default: 'vcluster-ns'
 
-Future Ideas
-Add labels in Port for tracking vCluster status.
+jobs:
+  generate-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-Setup automatic clean-up of old vClusters.
+      - name: Create vCluster manifest
+        run: |
+          mkdir -p clusters/dev/
+          cat <<EOF > clusters/dev/${{ github.event.inputs.clusterName }}.yaml
+          apiVersion: cluster.x-k8s.io/v1beta1
+          kind: Cluster
+          metadata:
+            name: ${{ github.event.inputs.clusterName }}
+            namespace: ${{ github.event.inputs.namespace }}
+          spec:
+            infrastructureRef:
+              apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
+              kind: VCluster
+              name: ${{ github.event.inputs.clusterName }}
+          EOF
 
-Add webhooks from ArgoCD for sync status back to Port.
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Deploy vCluster ${{ github.event.inputs.clusterName }}"
+          branch: main
