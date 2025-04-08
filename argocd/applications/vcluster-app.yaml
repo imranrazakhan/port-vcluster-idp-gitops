@@ -1,17 +1,30 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: vcluster-app
+  name: vcluster-set
+  namespace: argocd
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/your-org/vcluster-repo.git
-    targetRevision: HEAD
-    path: clusters/dev
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
-  syncPolicy:
-    automated:
-      selfHeal: true
-      prune: true
+  generators:
+    - git:
+        repoURL: https://github.com/YOUR_ORG/YOUR_REPO.git
+        revision: main
+        directories:
+          - path: clusters/dev/*
+  template:
+    metadata:
+      name: '{{path.basename}}-vcluster'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/YOUR_ORG/YOUR_REPO.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
