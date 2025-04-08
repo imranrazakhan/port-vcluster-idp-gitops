@@ -1,0 +1,32 @@
+{
+  "identifier": "k8s-vcluster",
+  "title": "Kubernetes Virtual Cluster",
+  "icon": "Azure",
+  "schema": {
+    "properties": {
+      "clusterName": {
+        "type": "string",
+        "title": "Cluster Name"
+      },
+      "namespace": {
+        "type": "string",
+        "title": "Namespace"
+      },
+      "kubernetesVersion": {
+        "type": "string",
+        "title": "K8s Version",
+        "enum": [
+          "1.27",
+          "1.28"
+        ]
+      }
+    },
+    "required": [
+      "clusterName"
+    ]
+  },
+  "mirrorProperties": {},
+  "calculationProperties": {},
+  "aggregationProperties": {},
+  "relations": {}
+}
